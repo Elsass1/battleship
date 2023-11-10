@@ -111,12 +111,12 @@ function canPlaceShip(
   numCols
 ) {
   if (direction === "horizontal") {
-    if (startCol + shipLength > numCols) return false;
+    if (startCol + shipLength - 1 > numCols) return false;
     for (let i = 0; i < shipLength; i++) {
       if (board[startRow][startCol + i] !== "O") return false;
     }
   } else {
-    if (startRow + shipLength > numRows) return false;
+    if (startRow + shipLength - 1 > numRows) return false;
     for (let i = 0; i < shipLength; i++) {
       if (board[startRow + i][startCol] !== "O") return false;
     }
@@ -138,7 +138,30 @@ function placeShipsRandomly(board, fleet) {
   let numRows = board.length - 1;
   let numCols = board[0].length - 1;
 
-  for (let i = 0; i < fleet.length; i++) {}
+  for (let i = 0; i < fleet.length; i++) {
+    let shipPlaced = false;
+    while (!shipPlaced) {
+      let rowIndex = Math.floor(Math.random() * numRows) + 1;
+      let colIndex = Math.floor(Math.random() * numCols) + 1;
+      let direction = Math.random() < 0.5 ? "horizontal" : "vertical";
+
+      if (
+        canPlaceShip(
+          board,
+          rowIndex,
+          colIndex,
+          direction,
+          fleet[i].size,
+          numRows,
+          numCols
+        )
+      ) {
+        placeShip(board, rowIndex, colIndex, direction, fleet[i].size);
+        shipPlaced = true;
+      }
+    }
+  }
+  return board;
 }
 
 console.log(createBoard(gridSize));
@@ -156,10 +179,15 @@ function printBoard(board) {
 
 // make sure that the ship is placed within the bounderies of the board
 
+//let board = createBoard(gridSize);
+//console.log(board);
+//printBoard(board);
+
+// Testing the function
 let board = createBoard(gridSize);
-console.log(board);
+console.log("Board before placing ships:");
 printBoard(board);
 
-tryPlaceEachShip(board, fleet, 1, 1, "horizontal", 10, 10);
-placeShip(board, 1, 1, "horizontal", 4);
-console.log(board);
+placeShipsRandomly(board, fleet);
+console.log("Board after placing ships:");
+printBoard(board);
