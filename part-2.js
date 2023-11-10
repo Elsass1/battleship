@@ -4,6 +4,8 @@ const pressedKey = readlineSync.keyIn("Press any key to start the game.");
 
 // grid size
 
+const numberOfShips = 5;
+
 let sizeQuestion = readlineSync.question(
   "What board's size would you like to play on? ie 5 for a 5x5 board. ",
   {
@@ -14,7 +16,48 @@ let sizeQuestion = readlineSync.question(
 
 let gridSize = +sizeQuestion;
 
-// printing a grid based on the selected number
+const fleet = [
+  {
+    id: 1,
+    name: "Submarine",
+    size: 2,
+    orientation: "",
+    hits: 0,
+    floating: true,
+  },
+  {
+    id: 2,
+    name: "Destroyer",
+    size: 3,
+    orientation: "",
+    hits: 0,
+    floating: true,
+  },
+  {
+    id: 3,
+    name: "Cruiser",
+    size: 3,
+    orientation: "",
+    hits: 0,
+    floating: true,
+  },
+  {
+    id: 4,
+    name: "Fregate",
+    size: 4,
+    orientation: "",
+    hits: 0,
+    floating: true,
+  },
+  {
+    id: 5,
+    name: "Aircraft Carrier",
+    size: 5,
+    orientation: "",
+    hits: 0,
+    floating: true,
+  },
+];
 
 function createBoard(size) {
   let board = [];
@@ -27,11 +70,96 @@ function createBoard(size) {
   for (let row = 1; row <= size; row++) {
     let rowContent = [String.fromCharCode(row + 64) + " "];
     for (let column = 0; column < size; column++) {
-      rowContent.push(".");
+      rowContent.push("O");
     }
     board.push(rowContent);
   }
   return board;
 }
 
+// work a ship selector
+function tryPlaceEachShip(
+  board,
+  fleet,
+  startRow,
+  startCol,
+  direction,
+  numRows,
+  numCols
+) {
+  fleet.forEach((ship) => {
+    const canPlace = canPlaceShip(
+      board,
+      startRow,
+      startCol,
+      direction,
+      ship.size,
+      numRows,
+      numCols
+    );
+    console.log(`Can place ${ship.name}: ${canPlace}`);
+  });
+}
+
+function canPlaceShip(
+  board,
+  startRow,
+  startCol,
+  direction,
+  shipLength,
+  numRows,
+  numCols
+) {
+  if (direction === "horizontal") {
+    if (startCol + shipLength > numCols) return false;
+    for (let i = 0; i < shipLength; i++) {
+      if (board[startRow][startCol + i] !== "O") return false;
+    }
+  } else {
+    if (startRow + shipLength > numRows) return false;
+    for (let i = 0; i < shipLength; i++) {
+      if (board[startRow + i][startCol] !== "O") return false;
+    }
+  }
+  return true;
+}
+
+function placeShip(board, startRow, startCol, direction, shipLength) {
+  for (let i = 0; i < shipLength; i++) {
+    if (direction === "horizontal") {
+      board[startRow][startCol + i] = "S";
+    } else {
+      board[startRow + i][startCol] = "S";
+    }
+  }
+}
+
+function placeShipsRandomly(board, fleet) {
+  let numRows = board.length - 1;
+  let numCols = board[0].length - 1;
+
+  for (let i = 0; i < fleet.length; i++) {}
+}
+
 console.log(createBoard(gridSize));
+//shipSelector(fleet);
+
+function printBoard(board) {
+  for (let row of board) {
+    console.log(row.join(" "));
+  }
+}
+
+// decide if the ship is placed vertically or horizontally
+
+// verify that there is space
+
+// make sure that the ship is placed within the bounderies of the board
+
+let board = createBoard(gridSize);
+console.log(board);
+printBoard(board);
+
+tryPlaceEachShip(board, fleet, 1, 1, "horizontal", 10, 10);
+placeShip(board, 1, 1, "horizontal", 4);
+console.log(board);
