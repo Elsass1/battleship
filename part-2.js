@@ -164,8 +164,62 @@ function placeShipsRandomly(board, fleet) {
   return board;
 }
 
+function playGame(board, fleet) {
+  let remainingShips = fleet.length;
+
+  console.log("Number of ships left: ", remainingShips);
+
+  while (remainingShips > 0) {
+    let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
+      limit: /^[A-Ja-j]([0-9]|10)$/,
+      limitMessage: "This is not a valid location. Shoot again!",
+    });
+    // convert from string to array
+    let arrayCoordinates = strike.split("");
+    let row =
+      arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) -
+      "A".charCodeAt(0) +
+      1;
+    let column = Number(arrayCoordinates[1]);
+
+    // call processStrike with the calculated row and column
+    remainingShips = processStrike(board, row, column, remainingShips);
+    if (remainingShips === 0) {
+      if (
+        readlineSync.keyInYN(
+          "You have destroyed all battleships. Would you like to play again? "
+        )
+      ) {
+        return startGame();
+      } else {
+        console.log("Thanks for playing captain!");
+        return;
+      }
+    }
+  }
+}
+
+function processStrike(board, row, column, shipCount, fleet) {
+  let coordinates = board[row][column];
+  if (coordinates === "S") {
+    board[row][column] = "X"; // mark a hit on target
+    fleet.hits += 1;
+    if (fleet.size === fleet.hits) {
+      shipCount--;
+    }
+    console.log(
+      `Hit. You have sunk a battleship. ${shipCount} ship remaining.`
+    );
+  } else if (coordinates === "O") {
+    board[row][column] = "M";
+    console.log("You have missed!");
+  } else {
+    console.log("You have already picked this location. Miss!");
+  }
+  return shipCount;
+}
+console.log("this is what gridSize prints");
 console.log(createBoard(gridSize));
-//shipSelector(fleet);
 
 function printBoard(board) {
   for (let row of board) {
@@ -173,21 +227,14 @@ function printBoard(board) {
   }
 }
 
-// decide if the ship is placed vertically or horizontally
+// Start the game
+function startGame() {
+  let board = createBoard(gridSize);
+  placeShipsRandomly(board, fleet);
+  printBoard(board);
+  playGame(board, fleet);
+}
 
-// verify that there is space
+startGame();
 
-// make sure that the ship is placed within the bounderies of the board
-
-//let board = createBoard(gridSize);
-//console.log(board);
-//printBoard(board);
-
-// Testing the function
-let board = createBoard(gridSize);
-console.log("Board before placing ships:");
-printBoard(board);
-
-placeShipsRandomly(board, fleet);
-console.log("Board after placing ships:");
-printBoard(board);
+// work on processStrikes()
