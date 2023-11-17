@@ -223,23 +223,12 @@ function processStrike(board, row, column, shipCount, fleet) {
   }
   return shipCount;
 }
-console.log("this is what gridSize prints");
-console.log(createBoard(gridSize));
-
-function printBoard(board) {
-  for (let row of board) {
-    console.log(row.join(" "));
-  }
-}
 
 // Start the game
 function startGame() {
   let board = createBoard(gridSize);
   placeShipsRandomly(board, fleet);
-  printBoard(board);
   playGame(board, fleet);
 }
 
 startGame();
-
-// work on processStrikes()
