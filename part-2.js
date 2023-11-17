@@ -23,7 +23,6 @@ const fleet = [
     size: 2,
     orientation: "",
     hits: 0,
-    floating: true,
   },
   {
     id: 2,
@@ -31,7 +30,6 @@ const fleet = [
     size: 3,
     orientation: "",
     hits: 0,
-    floating: true,
   },
   {
     id: 3,
@@ -39,7 +37,6 @@ const fleet = [
     size: 3,
     orientation: "",
     hits: 0,
-    floating: true,
   },
   {
     id: 4,
@@ -47,7 +44,6 @@ const fleet = [
     size: 4,
     orientation: "",
     hits: 0,
-    floating: true,
   },
   {
     id: 5,
@@ -55,7 +51,6 @@ const fleet = [
     size: 5,
     orientation: "",
     hits: 0,
-    floating: true,
   },
 ];
 
@@ -124,12 +119,12 @@ function canPlaceShip(
   return true;
 }
 
-function placeShip(board, startRow, startCol, direction, shipLength) {
-  for (let i = 0; i < shipLength; i++) {
-    if (direction === "horizontal") {
-      board[startRow][startCol + i] = "S";
+function placeShip(board, ship, startRow, startCol) {
+  for (let i = 0; i < ship.size; i++) {
+    if (ship.orientation === "horizontal") {
+      board[startRow][startCol + i] = ship.id;
     } else {
-      board[startRow + i][startCol] = "S";
+      board[startRow + i][startCol] = ship.id;
     }
   }
 }
@@ -138,36 +133,35 @@ function placeShipsRandomly(board, fleet) {
   let numRows = board.length - 1;
   let numCols = board[0].length - 1;
 
-  for (let i = 0; i < fleet.length; i++) {
+  fleet.forEach((ship) => {
     let shipPlaced = false;
     while (!shipPlaced) {
       let rowIndex = Math.floor(Math.random() * numRows) + 1;
       let colIndex = Math.floor(Math.random() * numCols) + 1;
       let direction = Math.random() < 0.5 ? "horizontal" : "vertical";
-
+      ship.orientation = direction;
       if (
         canPlaceShip(
           board,
           rowIndex,
           colIndex,
           direction,
-          fleet[i].size,
+          ship.size,
           numRows,
           numCols
         )
       ) {
-        placeShip(board, rowIndex, colIndex, direction, fleet[i].size);
+        placeShip(board, ship, rowIndex, colIndex);
         shipPlaced = true;
       }
     }
-  }
-  return board;
+  });
 }
 
 function playGame(board, fleet) {
   let remainingShips = fleet.length;
 
-  console.log("Number of ships left: ", remainingShips);
+  // console.log("Number of ships left: ", remainingShips);
 
   while (remainingShips > 0) {
     let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
@@ -183,7 +177,7 @@ function playGame(board, fleet) {
     let column = Number(arrayCoordinates[1]);
 
     // call processStrike with the calculated row and column
-    remainingShips = processStrike(board, row, column, remainingShips);
+    remainingShips = processStrike(board, row, column, remainingShips, fleet);
     if (remainingShips === 0) {
       if (
         readlineSync.keyInYN(
@@ -200,17 +194,28 @@ function playGame(board, fleet) {
 }
 
 function processStrike(board, row, column, shipCount, fleet) {
-  let coordinates = board[row][column];
-  if (coordinates === "S") {
+  let shipId = board[row][column];
+  if (typeof shipId === "number") {
     board[row][column] = "X"; // mark a hit on target
-    fleet.hits += 1;
-    if (fleet.size === fleet.hits) {
-      shipCount--;
+    let hitShip = fleet.find((ship) => ship.id === shipId);
+    if (hitShip) {
+      hitShip.hits += 1;
+      if (hitShip.size === hitShip.hits) {
+        shipCount--;
+        if (shipCount > 1) {
+          console.log(
+            `Hit. You have sunk ${hitShip.name}. ${shipCount} ships remaining.`
+          );
+        } else {
+          console.log(
+            `Hit. You have sunk ${hitShip.name}. ${shipCount} ship remaining.`
+          );
+        }
+      } else {
+        console.log("Hit, but not sunk.");
+      }
     }
-    console.log(
-      `Hit. You have sunk a battleship. ${shipCount} ship remaining.`
-    );
-  } else if (coordinates === "O") {
+  } else if (shipId === "O") {
     board[row][column] = "M";
     console.log("You have missed!");
   } else {
