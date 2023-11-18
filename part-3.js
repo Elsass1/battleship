@@ -64,6 +64,12 @@ function createBoard(size) {
   }
   board.push(headerRow);
 
+  let lineRow = ["   "];
+  for (let column = 0; column < size; column++) {
+    lineRow.push("---");
+  }
+  board.push(lineRow);
+
   // Create each row
   for (let row = 1; row <= size; row++) {
     let rowLabel = String.fromCharCode(row + 64); // Convert number to letter
@@ -75,6 +81,12 @@ function createBoard(size) {
     }
     rowContent.push("|"); // Add ending border to each row
     board.push(rowContent);
+
+    let lineRow = ["   "];
+    for (let column = 0; column < size; column++) {
+      lineRow.push("---");
+    }
+    board.push(lineRow);
   }
   return board;
 }
