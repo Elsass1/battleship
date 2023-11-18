@@ -190,9 +190,7 @@ function playGame(board, fleet) {
     // convert from string to array
     let arrayCoordinates = strike.split("");
     let row =
-      arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) -
-      "A".charCodeAt(0) +
-      1;
+      arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) - "A".charCodeAt(0);
     let column = parseInt(arrayCoordinates.slice(1).join(""));
 
     // call processStrike with the calculated row and column
@@ -216,19 +214,17 @@ function playGame(board, fleet) {
 }
 
 function processStrike(board, row, column, shipCount, fleet) {
-  //   let shipId = board[row][column];
-  //   let shipIdRegex = /\d/;
+  let adjustedRow = row * 2 + 2;
 
-  let shipIdInfo = board[row][column];
+  let shipIdInfo = board[adjustedRow][column];
   let shipIdRegex = /\d/;
 
   if (shipIdRegex.test(shipIdInfo)) {
     let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
 
     // Mark a hit on the target
-    board[row][column] = "| X";
+    board[adjustedRow][column] = "| X";
 
-    // board[row][column] = " X "; // mark a hit on target
     let hitShip = fleet.find((ship) => ship.id === shipId);
     if (hitShip) {
       hitShip.hits += 1;
@@ -249,7 +245,7 @@ function processStrike(board, row, column, shipCount, fleet) {
       }
     }
   } else if (shipIdInfo === "|  ") {
-    board[row][column] = "| M";
+    board[adjustedRow][column] = "| M";
     console.log("You have missed!");
   } else {
     console.log("You have already picked this location. Miss!");
