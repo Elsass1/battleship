@@ -174,7 +174,7 @@ function playGame(board, fleet) {
       arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) -
       "A".charCodeAt(0) +
       1;
-    let column = Number(arrayCoordinates[1]);
+    let column = parseInt(arrayCoordinates.slice(1).join(""));
 
     // call processStrike with the calculated row and column
     remainingShips = processStrike(board, row, column, remainingShips, fleet);
