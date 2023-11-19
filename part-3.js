@@ -54,7 +54,46 @@ const fleet = [
   },
 ];
 
+// Backend board
 function createBoard(size) {
+  let board = [];
+
+  // Create header row with column numbers
+  let headerRow = ["   "]; // Initial spacing for row labels
+  for (let column = 1; column <= size; column++) {
+    headerRow.push(`${column < 10 ? " " : " "}${column} `); // Add extra space for single-digit numbers
+  }
+  board.push(headerRow);
+
+  let lineRow = ["   "];
+  for (let column = 0; column < size; column++) {
+    lineRow.push("---");
+  }
+  board.push(lineRow);
+
+  // Create each row
+  for (let row = 1; row <= size; row++) {
+    let rowLabel = String.fromCharCode(row + 64); // Convert number to letter
+    let rowContent = [rowLabel + " "]; // Row header
+
+    // Fill the row with cells
+    for (let column = 0; column < size; column++) {
+      rowContent.push("|  "); // Add a cell
+    }
+    rowContent.push("|"); // Add ending border to each row
+    board.push(rowContent);
+
+    let lineRow = ["   "];
+    for (let column = 0; column < size; column++) {
+      lineRow.push("---");
+    }
+    board.push(lineRow);
+  }
+  return board;
+}
+
+// Frontend board
+function createGuiBoard(size) {
   let board = [];
 
   // Create header row with column numbers
@@ -262,11 +301,15 @@ function printBoard(board) {
 // Start the game
 function startGame() {
   let board = createBoard(gridSize);
+  let boardGui = createGuiBoard(gridSize);
   placeShipsRandomly(board, fleet);
+  console.log("backend board");
   printBoard(board);
+  console.log("GUI board");
+  printBoard(boardGui);
   playGame(board, fleet);
 }
 
 startGame();
 
-// work on processStrikes()
+// convert the backend grid (for the computer) to a front-end computer for the player
