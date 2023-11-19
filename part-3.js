@@ -2,8 +2,6 @@ var readlineSync = require("readline-sync");
 
 const pressedKey = readlineSync.keyIn("Press any key to start the game.");
 
-// grid size
-
 const numberOfShips = 5;
 
 let sizeQuestion = readlineSync.question(
@@ -64,7 +62,7 @@ const fleet = [
   },
 ];
 
-// Backend board
+// backend board
 function createBoard(size) {
   let board = [];
 
@@ -81,13 +79,13 @@ function createBoard(size) {
   }
   board.push(lineRow);
 
-  // Create each row
+  // create each row
   for (let row = 1; row <= size; row++) {
     // convert number to letter
     let rowLabel = String.fromCharCode(row + 64);
     let rowContent = [rowLabel + " "];
 
-    // Fill the row with cells
+    // fill the row with cells
     for (let column = 0; column < size; column++) {
       rowContent.push("|  ");
     }
@@ -103,11 +101,11 @@ function createBoard(size) {
   return board;
 }
 
-// Frontend board
+// frontend board
 function createGuiBoard(size) {
   let board = [];
 
-  // Create header row with column numbers
+  // create header row with column numbers
   let headerRow = ["   "];
   for (let column = 1; column <= size; column++) {
     headerRow.push(`${column < 10 ? " " : " "}${column} `);
@@ -120,12 +118,12 @@ function createGuiBoard(size) {
   }
   board.push(lineRow);
 
-  // Create each row
+  // create each row
   for (let row = 1; row <= size; row++) {
     let rowLabel = String.fromCharCode(row + 64);
     let rowContent = [rowLabel + " "];
 
-    // Fill the row with cells
+    // fill the row with cells
     for (let column = 0; column < size; column++) {
       rowContent.push("|  ");
     }
@@ -312,18 +310,12 @@ function printBoard(board) {
   }
 }
 
-// Start the game
 function startGame() {
   let board = createBoard(gridSize);
   let boardGui = createGuiBoard(gridSize);
   placeShipsRandomly(board, fleet);
-  console.log("backend board");
-  printBoard(board);
-  console.log("GUI board");
   printBoard(boardGui);
   playGame(board, boardGui, fleet);
 }
 
 startGame();
-
-// convert the backend grid (for the computer) to a front-end computer for the player
