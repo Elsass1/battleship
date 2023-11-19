@@ -2,8 +2,6 @@ var readlineSync = require("readline-sync");
 
 const pressedKey = readlineSync.keyIn("Press any key to start the game.");
 
-// grid size
-
 const numberOfShips = 5;
 
 let sizeQuestion = readlineSync.question(
@@ -19,35 +17,35 @@ let gridSize = +sizeQuestion;
 const fleet = [
   {
     id: 1,
-    name: "Submarine",
+    name: "submarine",
     size: 2,
     orientation: "",
     hits: 0,
   },
   {
     id: 2,
-    name: "Destroyer",
+    name: "destroyer",
     size: 3,
     orientation: "",
     hits: 0,
   },
   {
     id: 3,
-    name: "Cruiser",
+    name: "cruiser",
     size: 3,
     orientation: "",
     hits: 0,
   },
   {
     id: 4,
-    name: "Fregate",
+    name: "fregate",
     size: 4,
     orientation: "",
     hits: 0,
   },
   {
     id: 5,
-    name: "Aircraft Carrier",
+    name: "aircraft carrier",
     size: 5,
     orientation: "",
     hits: 0,
@@ -72,7 +70,6 @@ function createBoard(size) {
   return board;
 }
 
-// work a ship selector
 function tryPlaceEachShip(
   board,
   fleet,
@@ -161,8 +158,6 @@ function placeShipsRandomly(board, fleet) {
 function playGame(board, fleet) {
   let remainingShips = fleet.length;
 
-  // console.log("Number of ships left: ", remainingShips);
-
   while (remainingShips > 0) {
     let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
       limit: /^[A-Ja-j]([0-9]|10)$/,
@@ -196,21 +191,17 @@ function playGame(board, fleet) {
 function processStrike(board, row, column, shipCount, fleet) {
   let shipId = board[row][column];
   if (typeof shipId === "number") {
-    board[row][column] = "X"; // mark a hit on target
+    board[row][column] = "X";
     let hitShip = fleet.find((ship) => ship.id === shipId);
     if (hitShip) {
       hitShip.hits += 1;
       if (hitShip.size === hitShip.hits) {
         shipCount--;
-        if (shipCount > 1) {
-          console.log(
-            `Hit. You have sunk ${hitShip.name}. ${shipCount} ships remaining.`
-          );
-        } else {
-          console.log(
-            `Hit. You have sunk ${hitShip.name}. ${shipCount} ship remaining.`
-          );
-        }
+        let article = hitShip.id === 5 ? "an" : "a";
+        let shipNum = shipCount > 1 ? "ships" : "ship";
+        console.log(
+          `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ${shipNum} remaining.`
+        );
       } else {
         console.log("Hit, but not sunk.");
       }
@@ -224,10 +215,16 @@ function processStrike(board, row, column, shipCount, fleet) {
   return shipCount;
 }
 
-// Start the game
+function printBoard(board) {
+  for (let row of board) {
+    console.log(row.join(" "));
+  }
+}
+
 function startGame() {
   let board = createBoard(gridSize);
   placeShipsRandomly(board, fleet);
+  printBoard(board);
   playGame(board, fleet);
 }
 
