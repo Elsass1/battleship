@@ -23,6 +23,8 @@ const fleet = [
     size: 2,
     orientation: "",
     hits: 0,
+    hit: false,
+    sunk: false,
   },
   {
     id: 2,
@@ -30,6 +32,8 @@ const fleet = [
     size: 3,
     orientation: "",
     hits: 0,
+    hit: false,
+    sunk: false,
   },
   {
     id: 3,
@@ -37,6 +41,8 @@ const fleet = [
     size: 3,
     orientation: "",
     hits: 0,
+    hit: false,
+    sunk: false,
   },
   {
     id: 4,
@@ -44,6 +50,8 @@ const fleet = [
     size: 4,
     orientation: "",
     hits: 0,
+    hit: false,
+    sunk: false,
   },
   {
     id: 5,
@@ -51,6 +59,8 @@ const fleet = [
     size: 5,
     orientation: "",
     hits: 0,
+    hit: false,
+    sunk: false,
   },
 ];
 
@@ -58,10 +68,10 @@ const fleet = [
 function createBoard(size) {
   let board = [];
 
-  // Create header row with column numbers
-  let headerRow = ["   "]; // Initial spacing for row labels
+  let headerRow = ["   "];
   for (let column = 1; column <= size; column++) {
-    headerRow.push(`${column < 10 ? " " : " "}${column} `); // Add extra space for single-digit numbers
+    // add extra space for single-digit numbers
+    headerRow.push(`${column < 10 ? " " : " "}${column} `);
   }
   board.push(headerRow);
 
@@ -73,14 +83,15 @@ function createBoard(size) {
 
   // Create each row
   for (let row = 1; row <= size; row++) {
-    let rowLabel = String.fromCharCode(row + 64); // Convert number to letter
-    let rowContent = [rowLabel + " "]; // Row header
+    // convert number to letter
+    let rowLabel = String.fromCharCode(row + 64);
+    let rowContent = [rowLabel + " "];
 
     // Fill the row with cells
     for (let column = 0; column < size; column++) {
-      rowContent.push("|  "); // Add a cell
+      rowContent.push("|  ");
     }
-    rowContent.push("|"); // Add ending border to each row
+    rowContent.push("|");
     board.push(rowContent);
 
     let lineRow = ["   "];
@@ -97,9 +108,9 @@ function createGuiBoard(size) {
   let board = [];
 
   // Create header row with column numbers
-  let headerRow = ["   "]; // Initial spacing for row labels
+  let headerRow = ["   "];
   for (let column = 1; column <= size; column++) {
-    headerRow.push(`${column < 10 ? " " : " "}${column} `); // Add extra space for single-digit numbers
+    headerRow.push(`${column < 10 ? " " : " "}${column} `);
   }
   board.push(headerRow);
 
@@ -111,14 +122,14 @@ function createGuiBoard(size) {
 
   // Create each row
   for (let row = 1; row <= size; row++) {
-    let rowLabel = String.fromCharCode(row + 64); // Convert number to letter
-    let rowContent = [rowLabel + " "]; // Row header
+    let rowLabel = String.fromCharCode(row + 64);
+    let rowContent = [rowLabel + " "];
 
     // Fill the row with cells
     for (let column = 0; column < size; column++) {
-      rowContent.push("|  "); // Add a cell
+      rowContent.push("|  ");
     }
-    rowContent.push("|"); // Add ending border to each row
+    rowContent.push("|");
     board.push(rowContent);
 
     let lineRow = ["   "];
@@ -130,7 +141,6 @@ function createGuiBoard(size) {
   return board;
 }
 
-// work a ship selector
 function tryPlaceEachShip(
   board,
   fleet,
@@ -216,10 +226,8 @@ function placeShipsRandomly(board, fleet) {
   });
 }
 
-function playGame(board, fleet) {
+function playGame(board, boardGui, fleet) {
   let remainingShips = fleet.length;
-
-  // console.log("Number of ships left: ", remainingShips);
 
   while (remainingShips > 0) {
     let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
@@ -233,9 +241,16 @@ function playGame(board, fleet) {
     let column = parseInt(arrayCoordinates.slice(1).join(""));
 
     // call processStrike with the calculated row and column
-    remainingShips = processStrike(board, row, column, remainingShips, fleet);
+    remainingShips = processStrike(
+      board,
+      boardGui,
+      row,
+      column,
+      remainingShips,
+      fleet
+    );
 
-    printBoard(board);
+    printBoard(boardGui);
 
     if (remainingShips === 0) {
       if (
@@ -252,39 +267,38 @@ function playGame(board, fleet) {
   }
 }
 
-function processStrike(board, row, column, shipCount, fleet) {
+function processStrike(board, boardGui, row, column, shipCount, fleet) {
   let adjustedRow = row * 2 + 2;
-
   let shipIdInfo = board[adjustedRow][column];
   let shipIdRegex = /\d/;
 
+  let shipHit = false;
+
   if (shipIdRegex.test(shipIdInfo)) {
     let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
-
-    // Mark a hit on the target
     board[adjustedRow][column] = "| X";
+    boardGui[adjustedRow][column] = "| X";
+    shipHit = true;
 
     let hitShip = fleet.find((ship) => ship.id === shipId);
     if (hitShip) {
       hitShip.hits += 1;
+      hitShip.hit = true;
       if (hitShip.size === hitShip.hits) {
         shipCount--;
+        hitShip.sunk = true;
         let article = hitShip.id === 5 ? "an" : "a";
-        if (shipCount > 1) {
-          console.log(
-            `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ships remaining.`
-          );
-        } else {
-          console.log(
-            `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ship remaining.`
-          );
-        }
+        let shipNum = shipCount > 1 ? "ships" : "ship";
+        console.log(
+          `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ${shipNum} remaining.`
+        );
       } else {
         console.log("Hit, but not sunk.");
       }
     }
   } else if (shipIdInfo === "|  ") {
     board[adjustedRow][column] = "| M";
+    boardGui[adjustedRow][column] = "| O";
     console.log("You have missed!");
   } else {
     console.log("You have already picked this location. Miss!");
@@ -307,7 +321,7 @@ function startGame() {
   printBoard(board);
   console.log("GUI board");
   printBoard(boardGui);
-  playGame(board, fleet);
+  playGame(board, boardGui, fleet);
 }
 
 startGame();
