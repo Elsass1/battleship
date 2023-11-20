@@ -240,10 +240,53 @@ function placeShipsRandomly(board, fleet) {
   });
 }
 
-function playGame(board, boardGui, playerFleet) {
-  let remainingShips = playerFleet.length;
+function numberToLetter(n) {
+  return String.fromCharCode("A".charCodeAt(0) + n - 1);
+}
 
-  while (remainingShips > 0) {
+function createRegexPattern(n) {
+  const letter = numberToLetter(n);
+  return `[A-${letter}](10|[0-9])`;
+}
+
+function getRandomLetterFromRegex(regex) {
+  const letterRange = regex.slice(1, 4);
+  const numberRange = regex.slice(10, 13);
+
+  const minChar = letterRange.charCodeAt(0);
+  const maxChar = letterRange.charCodeAt(2);
+
+  const randomNum = Math.floor(Math.random() * 10) + 1;
+
+  const randomCharCode =
+    Math.floor(Math.random() * (maxChar - minChar + 1)) + minChar;
+  return [String.fromCharCode(randomCharCode), randomNum];
+}
+
+// generates a stike coordinate for the computer
+function computerCoordinates(computerStrike) {
+  console.log("this is the random coordinate:", computerStrike);
+  let computerRow = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
+  let computerCol = computerStrike[1];
+  console.log("computer row:", computerRow);
+  console.log("computer column:", computerCol);
+}
+
+const regexPattern = createRegexPattern(gridSize);
+const computerStrike = getRandomLetterFromRegex(regexPattern);
+computerCoordinates(computerStrike);
+
+function playGame(
+  playerBoard,
+  computerBoard,
+  boardGui,
+  playerFleet,
+  computerFleet
+) {
+  let playerRemainingShips = playerFleet.length;
+  let computerRemaingShips = computerFleet;
+
+  while (playerRemainingShips > 0) {
     let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
       limit: /^[A-Ja-j]([0-9]|10)$/,
       limitMessage: "This is not a valid location. Shoot again!",
@@ -255,18 +298,18 @@ function playGame(board, boardGui, playerFleet) {
     let column = parseInt(arrayCoordinates.slice(1).join(""));
 
     // call processStrike with the calculated row and column
-    remainingShips = processStrike(
-      board,
+    playerRemainingShips = processStrike(
+      playerBoard,
       boardGui,
       row,
       column,
-      remainingShips,
+      playerRemainingShips,
       playerFleet
     );
 
     printBoard(boardGui);
 
-    if (remainingShips === 0) {
+    if (playerRemainingShips === 0) {
       if (
         readlineSync.keyInYN(
           "You have destroyed all battleships. Would you like to play again? "
@@ -338,7 +381,7 @@ function startGame() {
   printBoard(boardGui);
   console.log("This is the computer board");
   printBoard(computerBoard);
-  playGame(playerBoard, boardGui, computerBoard, playerFleet, computerFleet);
+  playGame(playerBoard, computerBoard, boardGui, playerFleet, computerFleet);
 }
 
 startGame();
