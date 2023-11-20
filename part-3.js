@@ -62,47 +62,7 @@ const fleet = [
   },
 ];
 
-// backend board
-function createBoard(size) {
-  let board = [];
-
-  let headerRow = ["   "];
-  for (let column = 1; column <= size; column++) {
-    // add extra space for single-digit numbers
-    headerRow.push(`${column < 10 ? " " : " "}${column} `);
-  }
-  board.push(headerRow);
-
-  let lineRow = ["   "];
-  for (let column = 0; column < size; column++) {
-    lineRow.push("---");
-  }
-  board.push(lineRow);
-
-  // create each row
-  for (let row = 1; row <= size; row++) {
-    // convert number to letter
-    let rowLabel = String.fromCharCode(row + 64);
-    let rowContent = [rowLabel + " "];
-
-    // fill the row with cells
-    for (let column = 0; column < size; column++) {
-      rowContent.push("|  ");
-    }
-    rowContent.push("|");
-    board.push(rowContent);
-
-    let lineRow = ["   "];
-    for (let column = 0; column < size; column++) {
-      lineRow.push("---");
-    }
-    board.push(lineRow);
-  }
-  return board;
-}
-
-// frontend board
-function createGuiBoard(size) {
+function createBoard(size, isGui = false) {
   let board = [];
 
   // create header row with column numbers
@@ -125,7 +85,11 @@ function createGuiBoard(size) {
 
     // fill the row with cells
     for (let column = 0; column < size; column++) {
-      rowContent.push("|  ");
+      if (isGui) {
+        rowContent.push("|  ");
+      } else {
+        rowContent.push("|  ");
+      }
     }
     rowContent.push("|");
     board.push(rowContent);
@@ -312,7 +276,7 @@ function printBoard(board) {
 
 function startGame() {
   let board = createBoard(gridSize);
-  let boardGui = createGuiBoard(gridSize);
+  let boardGui = createBoard(gridSize, true);
   placeShipsRandomly(board, fleet);
   printBoard(boardGui);
   playGame(board, boardGui, fleet);
