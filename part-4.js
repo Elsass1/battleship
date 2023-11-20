@@ -62,6 +62,54 @@ const playerFleet = [
   },
 ];
 
+const computerFleet = [
+  {
+    id: 1,
+    name: "submarine",
+    size: 2,
+    orientation: "",
+    hits: 0,
+    hit: false,
+    sunk: false,
+  },
+  {
+    id: 2,
+    name: "destroyer",
+    size: 3,
+    orientation: "",
+    hits: 0,
+    hit: false,
+    sunk: false,
+  },
+  {
+    id: 3,
+    name: "cruiser",
+    size: 3,
+    orientation: "",
+    hits: 0,
+    hit: false,
+    sunk: false,
+  },
+  {
+    id: 4,
+    name: "fregate",
+    size: 4,
+    orientation: "",
+    hits: 0,
+    hit: false,
+    sunk: false,
+  },
+  {
+    id: 5,
+    name: "aircraft carrier",
+    size: 5,
+    orientation: "",
+    hits: 0,
+    hit: false,
+    sunk: false,
+  },
+];
+
 function createBoard(size, isGui = false) {
   let board = [];
 
