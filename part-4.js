@@ -153,14 +153,14 @@ function createBoard(size, isGui = false, computer = false) {
 
 function tryPlaceEachShip(
   board,
-  playerFleet,
+  fleet,
   startRow,
   startCol,
   direction,
   numRows,
   numCols
 ) {
-  playerFleet.forEach((ship) => {
+  fleet.forEach((ship) => {
     const canPlace = canPlaceShip(
       board,
       startRow,
@@ -218,6 +218,10 @@ function placeShipsRandomly(board, fleet) {
       let colIndex = Math.floor(Math.random() * numCols) + 1;
       let direction = Math.random() < 0.5 ? "horizontal" : "vertical";
       ship.orientation = direction;
+
+      tryPlaceEachShip =
+        (board, fleet, rowIndex, colIndex, direction, numRows, numCols);
+
       if (
         canPlaceShip(
           board,
@@ -326,6 +330,7 @@ function startGame() {
   let playerBoard = createBoard(gridSize);
   let boardGui = createBoard(gridSize, true);
   let computerBoard = createBoard(gridSize, true);
+
   placeShipsRandomly(playerBoard, playerFleet);
   placeShipsRandomly(computerBoard, computerFleet);
   printBoard(playerBoard);
