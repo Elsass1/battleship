@@ -110,7 +110,7 @@ const computerFleet = [
   },
 ];
 
-function createBoard(size, isGui = false) {
+function createBoard(size, isGui = false, computer = false) {
   let board = [];
 
   // create header row with column numbers
@@ -207,11 +207,11 @@ function placeShip(board, ship, startRow, startCol) {
   }
 }
 
-function placeShipsRandomly(board, playerFleet) {
+function placeShipsRandomly(board, fleet) {
   let numRows = board.length - 1;
   let numCols = board[0].length - 1;
 
-  playerFleet.forEach((ship) => {
+  fleet.forEach((ship) => {
     let shipPlaced = false;
     while (!shipPlaced) {
       let rowIndex = Math.floor(Math.random() * numRows) + 1;
@@ -277,7 +277,7 @@ function playGame(board, boardGui, playerFleet) {
   }
 }
 
-function processStrike(board, boardGui, row, column, shipCount, playerFleet) {
+function processStrike(board, boardGui, row, column, shipCount, fleet) {
   let adjustedRow = row * 2 + 2;
   let shipIdInfo = board[adjustedRow][column];
   let shipIdRegex = /\d/;
@@ -290,7 +290,7 @@ function processStrike(board, boardGui, row, column, shipCount, playerFleet) {
     boardGui[adjustedRow][column] = "| X";
     shipHit = true;
 
-    let hitShip = playerFleet.find((ship) => ship.id === shipId);
+    let hitShip = fleet.find((ship) => ship.id === shipId);
     if (hitShip) {
       hitShip.hits += 1;
       hitShip.hit = true;
@@ -323,12 +323,17 @@ function printBoard(board) {
 }
 
 function startGame() {
-  let board = createBoard(gridSize);
+  let playerBoard = createBoard(gridSize);
   let boardGui = createBoard(gridSize, true);
-  placeShipsRandomly(board, playerFleet);
-  printBoard(board);
+  let computerBoard = createBoard(gridSize, true);
+  placeShipsRandomly(playerBoard, playerFleet);
+  placeShipsRandomly(computerBoard, computerFleet);
+  printBoard(playerBoard);
+  console.log("This is the GUI board");
   printBoard(boardGui);
-  playGame(board, boardGui, playerFleet);
+  console.log("This is the computer board");
+  printBoard(computerBoard);
+  playGame(playerBoard, boardGui, computerBoard, playerFleet, computerFleet);
 }
 
 startGame();
