@@ -249,7 +249,7 @@ function createRegexPattern(n) {
   return `[A-${letter}](10|[0-9])`;
 }
 
-function getRandomLetterFromRegex(regex) {
+function computerCoordinates(regex) {
   const letterRange = regex.slice(1, 4);
   const numberRange = regex.slice(10, 13);
 
@@ -263,18 +263,18 @@ function getRandomLetterFromRegex(regex) {
   return [String.fromCharCode(randomCharCode), randomNum];
 }
 
-// generates a stike coordinate for the computer
-function computerCoordinates(computerStrike) {
-  console.log("this is the random coordinate:", computerStrike);
-  let computerRow = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
-  let computerCol = computerStrike[1];
-  console.log("computer row:", computerRow);
-  console.log("computer column:", computerCol);
-}
+// // generates a stike coordinate for the computer
+// function computerCoordinates(computerStrike) {
+//   console.log("this is the random coordinate:", computerStrike);
+//   let computerRow = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
+//   let computerCol = computerStrike[1];
+//   console.log("computer row:", computerRow);
+//   console.log("computer column:", computerCol);
+// }
 
 const regexPattern = createRegexPattern(gridSize);
-const computerStrike = getRandomLetterFromRegex(regexPattern);
-computerCoordinates(computerStrike);
+
+//computerCoordinates(computerStrike);
 
 function playGame(
   playerBoard,
@@ -284,9 +284,9 @@ function playGame(
   computerFleet
 ) {
   let playerRemainingShips = playerFleet.length;
-  let computerRemaingShips = computerFleet;
+  let computerRemaingShips = computerFleet.length;
 
-  while (playerRemainingShips > 0) {
+  while (playerRemainingShips > 0 && computerRemaingShips > 0) {
     let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
       limit: /^[A-Ja-j]([0-9]|10)$/,
       limitMessage: "This is not a valid location. Shoot again!",
@@ -299,28 +299,48 @@ function playGame(
 
     // call processStrike with the calculated row and column
     playerRemainingShips = processStrike(
-      playerBoard,
+      computerBoard,
       boardGui,
       row,
       column,
       playerRemainingShips,
-      playerFleet
+      computerFleet
     );
 
     printBoard(boardGui);
 
-    if (playerRemainingShips === 0) {
-      if (
-        readlineSync.keyInYN(
-          "You have destroyed all battleships. Would you like to play again? "
-        )
-      ) {
-        return startGame();
-      } else {
-        console.log("Thanks for playing captain!");
-        return;
-      }
+    if (computerRemaingShips === 0) {
+      console.log("Congratulations captain! You won the battle!");
+      break;
     }
+
+    // for the computer
+    const computerStrike = computerCoordinates(regexPattern);
+    row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
+    column = computerStrike[1];
+
+    // call processStrike with the calculated row and column
+    computerRemaingShips = processStrike(
+      playerBoard,
+      boardGui,
+      row,
+      column,
+      computerRemaingShips,
+      playerFleet
+    );
+
+    printBoard(playerBoard);
+
+    if (playerRemainingShips === 0) {
+      console.log("You lost!");
+      break;
+    }
+  }
+
+  if (readlineSync.keyInYN("Would you like to play again? ")) {
+    startGame();
+  } else {
+    console.log("Thanks for playing captain!");
   }
 }
 
@@ -385,3 +405,5 @@ function startGame() {
 }
 
 startGame();
+
+// use computerCoordinates() in processStrike() to generate the strikes of the computer
