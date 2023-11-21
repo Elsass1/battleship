@@ -258,12 +258,17 @@ function createRegexPattern(n) {
 
 function computerCoordinates(regex) {
   const letterRange = regex.slice(1, 4);
-  const numberRange = regex.slice(10, 13);
+  //  const numberRange = regex.slice(10, 13);
 
   const minChar = letterRange.charCodeAt(0);
   const maxChar = letterRange.charCodeAt(2);
 
-  const randomNum = Math.floor(Math.random() * 10) + 1;
+  // generating a random value for n based on the size of the grid
+  const minNum = 1;
+  const maxNum = maxChar - minChar + 1;
+  const n = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+
+  const randomNum = Math.floor(Math.random() * n) + 1;
 
   const randomCharCode =
     Math.floor(Math.random() * (maxChar - minChar + 1)) + minChar;
@@ -432,6 +437,7 @@ function processStrike(
         if (hitShip.size === hitShip.hits) {
           shipCount--;
           hitShip.sunk = true;
+          console.log("player remaining ships:", shipCount);
         }
       }
     } else if (shipIdInfo === "|  ") {
@@ -571,4 +577,4 @@ function startGame() {
 
 startGame();
 
-// the computer is not winning when all my ships are sunk
+// the computer number coordinate should be dynamic
