@@ -462,97 +462,10 @@ function processStrike(
         fleet,
         isPlayer
       );
-      //pick a different coordinate and strike again
     }
   }
   return shipCount;
 }
-
-// function processStrike(
-//   board,
-//   boardGui,
-//   row,
-//   column,
-//   shipCount,
-//   fleet,
-//   isPlayer
-// ) {
-//   console.log("Inside processStrike, isPlayer:", isPlayer);
-//   let adjustedRow = row * 2 + 2;
-//   let shipIdInfo = board[adjustedRow][column];
-//   let shipIdRegex = /\d/;
-
-//   let shipHit = false;
-
-//   console.log(
-//     `Processing strike at row: ${row}, column: ${column}, isPlayer: ${isPlayer}`
-//   );
-
-//   if (isPlayer) {
-//     console.log("Player's turn to strike.");
-//     if (shipIdRegex.test(shipIdInfo)) {
-//       // Player hit a ship
-//       let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
-
-//       console.log(`Player hit a ship at ${row}, ${column}`);
-
-//       board[adjustedRow][column] = "| X";
-//       boardGui[adjustedRow][column] = "| X"; // Update the GUI for player hits
-//       shipHit = true;
-
-//       let hitShip = fleet.find((ship) => ship.id === shipId);
-//       if (hitShip) {
-//         hitShip.hits += 1;
-//         hitShip.hit = true;
-//         if (hitShip.size === hitShip.hits) {
-//           shipCount--;
-//           hitShip.sunk = true;
-//           let article = hitShip.id === 5 ? "an" : "a";
-//           let shipNum = shipCount > 1 ? "ships" : "ship";
-//           console.log(
-//             `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ${shipNum} remaining.`
-//           );
-//         } else {
-//           console.log("Hit, but not sunk.");
-//         }
-//       }
-//     } else if (shipIdInfo === "|  ") {
-//       // Player missed
-//       console.log(`Player missed at ${row}, ${column}`);
-
-//       board[adjustedRow][column] = "| M";
-//       boardGui[adjustedRow][column] = "| O"; // Update the GUI for player misses
-//       console.log("You have missed!");
-//     } else {
-//       console.log("You have already picked this location. Miss!");
-//     }
-//   } else {
-//     // Computer's turn to strike.
-//     if (shipIdRegex.test(shipIdInfo)) {
-//       // Computer hit a ship
-//       let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
-
-//       console.log(`Computer hit a ship at ${row}, ${column}`);
-
-//       board[adjustedRow][column] = "| X";
-//       shipHit = true;
-
-//       let hitShip = fleet.find((ship) => ship.id === shipId);
-//       if (hitShip) {
-//         hitShip.hits += 1;
-//         hitShip.hit = true;
-//         if (hitShip.size === hitShip.hits) {
-//           shipCount--;
-//           hitShip.sunk = true;
-//         }
-//       }
-//     } else if (shipIdInfo === "|  ") {
-//       // Computer missed
-//       console.log(`Computer missed at ${row}, ${column}`);
-//     }
-//   }
-//   return shipCount;
-// }
 
 function printBoard(board) {
   for (let row of board) {
@@ -576,5 +489,4 @@ function startGame() {
 }
 
 startGame();
-
-// the computer number coordinate should be dynamic
+//clean the game and merge with main
