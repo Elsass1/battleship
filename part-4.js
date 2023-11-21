@@ -170,7 +170,7 @@ function tryPlaceEachShip(
       numRows,
       numCols
     );
-    console.log(`Can place ${ship.name}: ${canPlace}`);
+    //    console.log(`Can place ${ship.name}: ${canPlace}`);
   });
 }
 
@@ -219,8 +219,15 @@ function placeShipsRandomly(board, fleet) {
       let direction = Math.random() < 0.5 ? "horizontal" : "vertical";
       ship.orientation = direction;
 
-      tryPlaceEachShip =
-        (board, fleet, rowIndex, colIndex, direction, numRows, numCols);
+      tryPlaceEachShip(
+        board,
+        fleet,
+        rowIndex,
+        colIndex,
+        direction,
+        numRows,
+        numCols
+      );
 
       if (
         canPlaceShip(
@@ -263,18 +270,7 @@ function computerCoordinates(regex) {
   return [String.fromCharCode(randomCharCode), randomNum];
 }
 
-// // generates a stike coordinate for the computer
-// function computerCoordinates(computerStrike) {
-//   console.log("this is the random coordinate:", computerStrike);
-//   let computerRow = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
-//   let computerCol = computerStrike[1];
-//   console.log("computer row:", computerRow);
-//   console.log("computer column:", computerCol);
-// }
-
 const regexPattern = createRegexPattern(gridSize);
-
-//computerCoordinates(computerStrike);
 
 function playGame(
   playerBoard,
@@ -284,56 +280,73 @@ function playGame(
   computerFleet
 ) {
   let playerRemainingShips = playerFleet.length;
-  let computerRemaingShips = computerFleet.length;
+  let computerRemainingShips = computerFleet.length;
+  let isPlayer = true;
 
-  while (playerRemainingShips > 0 && computerRemaingShips > 0) {
-    let strike = readlineSync.question("Enter a location to strike ie 'A2': ", {
-      limit: /^[A-Ja-j]([0-9]|10)$/,
-      limitMessage: "This is not a valid location. Shoot again!",
-    });
-    // convert from string to array
-    let arrayCoordinates = strike.split("");
-    let row =
-      arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-    let column = parseInt(arrayCoordinates.slice(1).join(""));
+  while (playerRemainingShips > 0 && computerRemainingShips > 0) {
+    if (isPlayer) {
+      console.log("Current turn: Player");
+      let strike = readlineSync.question(
+        "Enter a location to strike ie 'A2': ",
+        {
+          limit: /^[A-Ja-j]([0-9]|10)$/,
+          limitMessage: "This is not a valid location. Shoot again!",
+        }
+      );
+      // convert from string to array
+      let arrayCoordinates = strike.split("");
+      let row =
+        arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) -
+        "A".charCodeAt(0);
+      let column = parseInt(arrayCoordinates.slice(1).join(""));
 
-    // call processStrike with the calculated row and column
-    playerRemainingShips = processStrike(
-      computerBoard,
-      boardGui,
-      row,
-      column,
-      playerRemainingShips,
-      computerFleet
-    );
+      // call processStrike with the calculated row and column
+      console.log("Calling processStrike, isPlayer:", isPlayer);
 
-    printBoard(boardGui);
+      computerRemainingShips = processStrike(
+        computerBoard,
+        boardGui,
+        row,
+        column,
+        computerRemainingShips,
+        computerFleet,
+        isPlayer
+      );
+      printBoard(boardGui);
 
-    if (computerRemaingShips === 0) {
-      console.log("Congratulations captain! You won the battle!");
-      break;
-    }
+      if (computerRemainingShips === 0) {
+        console.log("Congratulations captain! You won the battle!");
+        break;
+      }
+      console.log("End of Player's turn");
+      isPlayer = false; // This is correct for the player's turn
+    } else {
+      console.log("Current turn: Computer");
+      // for the computer
+      const computerStrike = computerCoordinates(regexPattern);
+      row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
+      column = computerStrike[1];
 
-    // for the computer
-    const computerStrike = computerCoordinates(regexPattern);
-    row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
-    column = computerStrike[1];
+      // call processStrike with the calculated row and column
+      console.log("Calling processStrike, isPlayer:", isPlayer);
 
-    // call processStrike with the calculated row and column
-    computerRemaingShips = processStrike(
-      playerBoard,
-      boardGui,
-      row,
-      column,
-      computerRemaingShips,
-      playerFleet
-    );
+      playerRemainingShips = processStrike(
+        playerBoard,
+        boardGui,
+        row,
+        column,
+        playerRemainingShips,
+        playerFleet,
+        isPlayer
+      );
+      printBoard(playerBoard);
 
-    printBoard(playerBoard);
-
-    if (playerRemainingShips === 0) {
-      console.log("You lost!");
-      break;
+      if (playerRemainingShips === 0) {
+        console.log("You lost!");
+        break;
+      }
+      console.log("End of Computer's turn");
+      isPlayer = true; // This is correct for the computer's turn
     }
   }
 
@@ -344,44 +357,196 @@ function playGame(
   }
 }
 
-function processStrike(board, boardGui, row, column, shipCount, fleet) {
+function processStrike(
+  board,
+  boardGui,
+  row,
+  column,
+  shipCount,
+  fleet,
+  isPlayer
+) {
+  console.log("Inside processStrike, isPlayer:", isPlayer);
   let adjustedRow = row * 2 + 2;
   let shipIdInfo = board[adjustedRow][column];
   let shipIdRegex = /\d/;
 
   let shipHit = false;
 
-  if (shipIdRegex.test(shipIdInfo)) {
-    let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
-    board[adjustedRow][column] = "| X";
-    boardGui[adjustedRow][column] = "| X";
-    shipHit = true;
+  console.log(
+    `Processing strike at row: ${row}, column: ${column}, isPlayer: ${isPlayer}`
+  );
 
-    let hitShip = fleet.find((ship) => ship.id === shipId);
-    if (hitShip) {
-      hitShip.hits += 1;
-      hitShip.hit = true;
-      if (hitShip.size === hitShip.hits) {
-        shipCount--;
-        hitShip.sunk = true;
-        let article = hitShip.id === 5 ? "an" : "a";
-        let shipNum = shipCount > 1 ? "ships" : "ship";
-        console.log(
-          `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ${shipNum} remaining.`
-        );
-      } else {
-        console.log("Hit, but not sunk.");
+  // when it's the player's turn to play
+  if (isPlayer) {
+    console.log("Player's turn to strike.");
+    if (shipIdRegex.test(shipIdInfo)) {
+      let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
+
+      console.log(`Player hit a ship at ${row}, ${column}`);
+
+      board[adjustedRow][column] = "| X";
+      boardGui[adjustedRow][column] = "| X";
+      shipHit = true;
+
+      let hitShip = fleet.find((ship) => ship.id === shipId);
+      if (hitShip) {
+        hitShip.hits += 1;
+        hitShip.hit = true;
+        if (hitShip.size === hitShip.hits) {
+          shipCount--;
+          hitShip.sunk = true;
+          let article = hitShip.id === 5 ? "an" : "a";
+          let shipNum = shipCount > 1 ? "ships" : "ship";
+          console.log(
+            `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ${shipNum} remaining.`
+          );
+        } else {
+          console.log("Hit, but not sunk.");
+        }
       }
+    } else if (shipIdInfo === "|  ") {
+      console.log(`Player missed at ${row}, ${column}`);
+
+      board[adjustedRow][column] = "| M";
+      boardGui[adjustedRow][column] = "| O";
+      console.log("You have missed!");
+    } else {
+      console.log("You have already picked this location. Miss!");
     }
-  } else if (shipIdInfo === "|  ") {
-    board[adjustedRow][column] = "| M";
-    boardGui[adjustedRow][column] = "| O";
-    console.log("You have missed!");
   } else {
-    console.log("You have already picked this location. Miss!");
+    console.log("Computer's turn to strike.");
+
+    // when it's the computer turn to play
+    if (shipIdRegex.test(shipIdInfo)) {
+      console.log(`Computer hit a ship at ${row}, ${column}`);
+
+      let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
+      board[adjustedRow][column] = "| X";
+      shipHit = true;
+
+      let hitShip = fleet.find((ship) => ship.id === shipId);
+      if (hitShip) {
+        hitShip.hits += 1;
+        hitShip.hit = true;
+        if (hitShip.size === hitShip.hits) {
+          shipCount--;
+          hitShip.sunk = true;
+        }
+      }
+    } else if (shipIdInfo === "|  ") {
+      console.log(`Computer missed at ${row}, ${column}`);
+
+      board[adjustedRow][column] = "| M";
+      // avoids the computer to select a coordinate already struck
+    } else if (
+      board[adjustedRow][column] === "| M" ||
+      board[adjustedRow][column] === "| X"
+    ) {
+      console.log("Location already picked, picking new coordinates.");
+      const computerStrike = computerCoordinates(regexPattern);
+      row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
+      column = computerStrike[1];
+      return processStrike(
+        board,
+        boardGui,
+        row,
+        column,
+        shipCount,
+        fleet,
+        isPlayer
+      );
+      //pick a different coordinate and strike again
+    }
   }
   return shipCount;
 }
+
+// function processStrike(
+//   board,
+//   boardGui,
+//   row,
+//   column,
+//   shipCount,
+//   fleet,
+//   isPlayer
+// ) {
+//   console.log("Inside processStrike, isPlayer:", isPlayer);
+//   let adjustedRow = row * 2 + 2;
+//   let shipIdInfo = board[adjustedRow][column];
+//   let shipIdRegex = /\d/;
+
+//   let shipHit = false;
+
+//   console.log(
+//     `Processing strike at row: ${row}, column: ${column}, isPlayer: ${isPlayer}`
+//   );
+
+//   if (isPlayer) {
+//     console.log("Player's turn to strike.");
+//     if (shipIdRegex.test(shipIdInfo)) {
+//       // Player hit a ship
+//       let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
+
+//       console.log(`Player hit a ship at ${row}, ${column}`);
+
+//       board[adjustedRow][column] = "| X";
+//       boardGui[adjustedRow][column] = "| X"; // Update the GUI for player hits
+//       shipHit = true;
+
+//       let hitShip = fleet.find((ship) => ship.id === shipId);
+//       if (hitShip) {
+//         hitShip.hits += 1;
+//         hitShip.hit = true;
+//         if (hitShip.size === hitShip.hits) {
+//           shipCount--;
+//           hitShip.sunk = true;
+//           let article = hitShip.id === 5 ? "an" : "a";
+//           let shipNum = shipCount > 1 ? "ships" : "ship";
+//           console.log(
+//             `Hit. You have sunk ${article} ${hitShip.name}. ${shipCount} ${shipNum} remaining.`
+//           );
+//         } else {
+//           console.log("Hit, but not sunk.");
+//         }
+//       }
+//     } else if (shipIdInfo === "|  ") {
+//       // Player missed
+//       console.log(`Player missed at ${row}, ${column}`);
+
+//       board[adjustedRow][column] = "| M";
+//       boardGui[adjustedRow][column] = "| O"; // Update the GUI for player misses
+//       console.log("You have missed!");
+//     } else {
+//       console.log("You have already picked this location. Miss!");
+//     }
+//   } else {
+//     // Computer's turn to strike.
+//     if (shipIdRegex.test(shipIdInfo)) {
+//       // Computer hit a ship
+//       let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
+
+//       console.log(`Computer hit a ship at ${row}, ${column}`);
+
+//       board[adjustedRow][column] = "| X";
+//       shipHit = true;
+
+//       let hitShip = fleet.find((ship) => ship.id === shipId);
+//       if (hitShip) {
+//         hitShip.hits += 1;
+//         hitShip.hit = true;
+//         if (hitShip.size === hitShip.hits) {
+//           shipCount--;
+//           hitShip.sunk = true;
+//         }
+//       }
+//     } else if (shipIdInfo === "|  ") {
+//       // Computer missed
+//       console.log(`Computer missed at ${row}, ${column}`);
+//     }
+//   }
+//   return shipCount;
+// }
 
 function printBoard(board) {
   for (let row of board) {
@@ -406,4 +571,4 @@ function startGame() {
 
 startGame();
 
-// use computerCoordinates() in processStrike() to generate the strikes of the computer
+// the computer is not winning when all my ships are sunk
