@@ -12,6 +12,7 @@ let sizeQuestion = readlineSync.question(
   }
 );
 
+// convert string to number
 let gridSize = +sizeQuestion;
 
 const playerFleet = [
@@ -258,7 +259,6 @@ function createRegexPattern(n) {
 
 function computerCoordinates(regex) {
   const letterRange = regex.slice(1, 4);
-  //  const numberRange = regex.slice(10, 13);
 
   const minChar = letterRange.charCodeAt(0);
   const maxChar = letterRange.charCodeAt(2);
@@ -290,7 +290,6 @@ function playGame(
 
   while (playerRemainingShips > 0 && computerRemainingShips > 0) {
     if (isPlayer) {
-      console.log("Current turn: Player");
       let strike = readlineSync.question(
         "Enter a location to strike ie 'A2': ",
         {
@@ -306,7 +305,6 @@ function playGame(
       let column = parseInt(arrayCoordinates.slice(1).join(""));
 
       // call processStrike with the calculated row and column
-      console.log("Calling processStrike, isPlayer:", isPlayer);
 
       computerRemainingShips = processStrike(
         computerBoard,
@@ -317,23 +315,22 @@ function playGame(
         computerFleet,
         isPlayer
       );
+
       printBoard(boardGui);
 
       if (computerRemainingShips === 0) {
         console.log("Congratulations captain! You won the battle!");
         break;
       }
-      console.log("End of Player's turn");
-      isPlayer = false; // This is correct for the player's turn
+
+      isPlayer = false;
     } else {
-      console.log("Current turn: Computer");
       // for the computer
       const computerStrike = computerCoordinates(regexPattern);
       row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
       column = computerStrike[1];
 
       // call processStrike with the calculated row and column
-      console.log("Calling processStrike, isPlayer:", isPlayer);
 
       playerRemainingShips = processStrike(
         playerBoard,
@@ -344,13 +341,12 @@ function playGame(
         playerFleet,
         isPlayer
       );
-      printBoard(playerBoard);
 
       if (playerRemainingShips === 0) {
         console.log("You lost!");
         break;
       }
-      console.log("End of Computer's turn");
+
       isPlayer = true; // This is correct for the computer's turn
     }
   }
@@ -371,24 +367,16 @@ function processStrike(
   fleet,
   isPlayer
 ) {
-  console.log("Inside processStrike, isPlayer:", isPlayer);
   let adjustedRow = row * 2 + 2;
   let shipIdInfo = board[adjustedRow][column];
   let shipIdRegex = /\d/;
 
   let shipHit = false;
 
-  console.log(
-    `Processing strike at row: ${row}, column: ${column}, isPlayer: ${isPlayer}`
-  );
-
   // when it's the player's turn to play
   if (isPlayer) {
-    console.log("Player's turn to strike.");
     if (shipIdRegex.test(shipIdInfo)) {
       let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
-
-      console.log(`Player hit a ship at ${row}, ${column}`);
 
       board[adjustedRow][column] = "| X";
       boardGui[adjustedRow][column] = "| X";
@@ -411,8 +399,6 @@ function processStrike(
         }
       }
     } else if (shipIdInfo === "|  ") {
-      console.log(`Player missed at ${row}, ${column}`);
-
       board[adjustedRow][column] = "| M";
       boardGui[adjustedRow][column] = "| O";
       console.log("You have missed!");
@@ -420,8 +406,6 @@ function processStrike(
       console.log("You have already picked this location. Miss!");
     }
   } else {
-    console.log("Computer's turn to strike.");
-
     // when it's the computer turn to play
     if (shipIdRegex.test(shipIdInfo)) {
       console.log(`Computer hit a ship at ${row}, ${column}`);
@@ -441,15 +425,12 @@ function processStrike(
         }
       }
     } else if (shipIdInfo === "|  ") {
-      console.log(`Computer missed at ${row}, ${column}`);
-
       board[adjustedRow][column] = "| M";
       // avoids the computer to select a coordinate already struck
     } else if (
       board[adjustedRow][column] === "| M" ||
       board[adjustedRow][column] === "| X"
     ) {
-      console.log("Location already picked, picking new coordinates.");
       const computerStrike = computerCoordinates(regexPattern);
       row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
       column = computerStrike[1];
@@ -480,11 +461,8 @@ function startGame() {
 
   placeShipsRandomly(playerBoard, playerFleet);
   placeShipsRandomly(computerBoard, computerFleet);
-  printBoard(playerBoard);
   console.log("This is the GUI board");
   printBoard(boardGui);
-  console.log("This is the computer board");
-  printBoard(computerBoard);
   playGame(playerBoard, computerBoard, boardGui, playerFleet, computerFleet);
 }
 
