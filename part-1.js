@@ -96,7 +96,6 @@ function printBoard(board) {
 function startGame() {
   let board = createBoard(3);
   placeShipsRandomly(board, numberOfShips);
-  printBoard(board);
   playGame(board);
 }
 

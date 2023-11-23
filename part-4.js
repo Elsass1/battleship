@@ -2,6 +2,7 @@ var readlineSync = require("readline-sync");
 
 const pressedKey = readlineSync.keyIn("Press any key to start the game.");
 
+// number of ships for each player
 const numberOfShips = 5;
 
 let sizeQuestion = readlineSync.question(
@@ -112,37 +113,48 @@ const computerFleet = [
 ];
 
 function createBoard(size, isGui = false, computer = false) {
+  // initialising an empty array to represent the board
   let board = [];
 
   // create header row with column numbers
-  let headerRow = ["   "];
+  let headerRow = ["   "]; // initial spacing
+  // looping through each column
   for (let column = 1; column <= size; column++) {
+    //if column is < 10, adds an additional space for alignment
     headerRow.push(`${column < 10 ? " " : " "}${column} `);
   }
   board.push(headerRow);
 
+  // create a row for separating the header from the grid
   let lineRow = ["   "];
+  // looping through the size of the board to create & push the row separator ---
   for (let column = 0; column < size; column++) {
     lineRow.push("---");
   }
   board.push(lineRow);
 
-  // create each row
+  // create each row of the board
   for (let row = 1; row <= size; row++) {
+    // convert row number to its corresponding letter label (1 becomes a)
     let rowLabel = String.fromCharCode(row + 64);
+    // unitialize the row with the row label
     let rowContent = [rowLabel + " "];
 
     // fill the row with cells
     for (let column = 0; column < size; column++) {
+      // for the GUI board
       if (isGui) {
         rowContent.push("|  ");
+        // for the other boards (player & computer)
       } else {
         rowContent.push("|  ");
       }
     }
+    // for the end of the board (left size)
     rowContent.push("|");
     board.push(rowContent);
 
+    // adds a sepator line after each row
     let lineRow = ["   "];
     for (let column = 0; column < size; column++) {
       lineRow.push("---");
@@ -152,29 +164,7 @@ function createBoard(size, isGui = false, computer = false) {
   return board;
 }
 
-function tryPlaceEachShip(
-  board,
-  fleet,
-  startRow,
-  startCol,
-  direction,
-  numRows,
-  numCols
-) {
-  fleet.forEach((ship) => {
-    const canPlace = canPlaceShip(
-      board,
-      startRow,
-      startCol,
-      direction,
-      ship.size,
-      numRows,
-      numCols
-    );
-    //    console.log(`Can place ${ship.name}: ${canPlace}`);
-  });
-}
-
+// check if a ship can be placed at designated position
 function canPlaceShip(
   board,
   startRow,
@@ -185,7 +175,9 @@ function canPlaceShip(
   numCols
 ) {
   if (direction === "horizontal") {
+    // check that the ship does not go over the board limits
     if (startCol + shipLength - 1 > numCols) return false;
+    // check that no other ship is present
     for (let i = 0; i < shipLength; i++) {
       if (board[startRow][startCol + i] !== "|  ") return false;
     }
@@ -195,14 +187,18 @@ function canPlaceShip(
       if (board[startRow + i][startCol] !== "|  ") return false;
     }
   }
+  // return true if no overlapping & ship does not go over the board limits
   return true;
 }
 
+// place a ship on the board
 function placeShip(board, ship, startRow, startCol) {
   for (let i = 0; i < ship.size; i++) {
     if (ship.orientation === "horizontal") {
+      // place ship horizontally by filling consecutive columns
       board[startRow][startCol + i] = "| " + ship.id;
     } else {
+      // place ship vertically by filling consecutive rows
       board[startRow + i][startCol] = "| " + ship.id;
     }
   }
@@ -220,16 +216,7 @@ function placeShipsRandomly(board, fleet) {
       let direction = Math.random() < 0.5 ? "horizontal" : "vertical";
       ship.orientation = direction;
 
-      tryPlaceEachShip(
-        board,
-        fleet,
-        rowIndex,
-        colIndex,
-        direction,
-        numRows,
-        numCols
-      );
-
+      // check if the ship can be placed
       if (
         canPlaceShip(
           board,
@@ -241,9 +228,12 @@ function placeShipsRandomly(board, fleet) {
           numCols
         )
       ) {
+        // places the ship if canPlaceShip returns true
         placeShip(board, ship, rowIndex, colIndex);
+        // marks the ship as placed
         shipPlaced = true;
       }
+      // if canPlaceShip returns false, the while loop continues with new random positions.
     }
   });
 }
@@ -347,7 +337,7 @@ function playGame(
         break;
       }
 
-      isPlayer = true; // This is correct for the computer's turn
+      isPlayer = true;
     }
   }
 
@@ -461,10 +451,8 @@ function startGame() {
 
   placeShipsRandomly(playerBoard, playerFleet);
   placeShipsRandomly(computerBoard, computerFleet);
-  console.log("This is the GUI board");
   printBoard(boardGui);
   playGame(playerBoard, computerBoard, boardGui, playerFleet, computerFleet);
 }
 
 startGame();
-//clean the game and merge with main

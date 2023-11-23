@@ -70,29 +70,6 @@ function createBoard(size) {
   return board;
 }
 
-function tryPlaceEachShip(
-  board,
-  fleet,
-  startRow,
-  startCol,
-  direction,
-  numRows,
-  numCols
-) {
-  fleet.forEach((ship) => {
-    const canPlace = canPlaceShip(
-      board,
-      startRow,
-      startCol,
-      direction,
-      ship.size,
-      numRows,
-      numCols
-    );
-    console.log(`Can place ${ship.name}: ${canPlace}`);
-  });
-}
-
 function canPlaceShip(
   board,
   startRow,
@@ -224,7 +201,6 @@ function printBoard(board) {
 function startGame() {
   let board = createBoard(gridSize);
   placeShipsRandomly(board, fleet);
-  printBoard(board);
   playGame(board, fleet);
 }
 
