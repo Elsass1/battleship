@@ -204,10 +204,12 @@ function placeShip(board, ship, startRow, startCol) {
   }
 }
 
+// randomly places ships on the board after having checked if it's possible to place at designated location
 function placeShipsRandomly(board, fleet) {
   let numRows = board.length - 1;
   let numCols = board[0].length - 1;
 
+  // loops over the fleet arrays and works on each object (the ships)
   fleet.forEach((ship) => {
     let shipPlaced = false;
     while (!shipPlaced) {
@@ -238,15 +240,19 @@ function placeShipsRandomly(board, fleet) {
   });
 }
 
-function numberToLetter(n) {
-  return String.fromCharCode("A".charCodeAt(0) + n - 1);
+// converts a number into a letter. This is for the computer's strike coordinates
+function numberToLetter(boardRow) {
+  return String.fromCharCode("A".charCodeAt(0) + boardRow - 1);
 }
 
-function createRegexPattern(n) {
-  const letter = numberToLetter(n);
-  return `[A-${letter}](10|[0-9])`;
+// creates a regex pattern based on the board size
+// this will define the range of the computer-generated strikes
+function createRegexPattern(boardSize) {
+  const lastRowletter = numberToLetter(boardSize);
+  return `[A-${lastRowletter}](10|[0-9])`;
 }
 
+// generates random computer stikes
 function computerCoordinates(regex) {
   const letterRange = regex.slice(1, 4);
 
@@ -265,8 +271,10 @@ function computerCoordinates(regex) {
   return [String.fromCharCode(randomCharCode), randomNum];
 }
 
+// generates and stores the regex pattern that defines the valid range of coordinates on the game board.
 const regexPattern = createRegexPattern(gridSize);
 
+// handles the gameplay
 function playGame(
   playerBoard,
   computerBoard,
@@ -274,11 +282,16 @@ function playGame(
   playerFleet,
   computerFleet
 ) {
+  // initializes the number of remaining ships for both player & computer
   let playerRemainingShips = playerFleet.length;
   let computerRemainingShips = computerFleet.length;
+
+  // a flag to keep track of whose turn it is, starting with the player
   let isPlayer = true;
 
+  // the game is playing as long as both players have unsunk ships
   while (playerRemainingShips > 0 && computerRemainingShips > 0) {
+    // if it's the player's turn
     if (isPlayer) {
       let strike = readlineSync.question(
         "Enter a location to strike ie 'A2': ",
@@ -287,21 +300,25 @@ function playGame(
           limitMessage: "This is not a valid location. Shoot again!",
         }
       );
-      // convert from string to array
+      // converts the input from the player (example "A10") from a string to array (example: ["A", "1", "0"])
       let arrayCoordinates = strike.split("");
+      // convert letter to a row number (example A becomes 0)
       let row =
         arrayCoordinates[0].toLocaleUpperCase().charCodeAt(0) -
         "A".charCodeAt(0);
+      // arrayCoordinate is the array ["A", "1", "0"]
+      // arrayCoordinates.slice(1) takes elements from index 1 (example ["1", "0"]
+      // join("")transform it into a string (example "10")
+      // parseInt transform it into a number (example 10)
       let column = parseInt(arrayCoordinates.slice(1).join(""));
 
-      // call processStrike with the calculated row and column
-
+      // handles the player's attack & adjusts the count of the computer's remaining ships
       computerRemainingShips = processStrike(
         computerBoard,
         boardGui,
         row,
         column,
-        computerRemainingShips,
+        computerRemainingShips, // shipCount in processStrike
         computerFleet,
         isPlayer
       );
@@ -310,17 +327,17 @@ function playGame(
 
       if (computerRemainingShips === 0) {
         console.log("Congratulations captain! You won the battle!");
+        // if the player won, the loop if exited
         break;
       }
-
+      // switch to the computer's turn
       isPlayer = false;
     } else {
-      // for the computer
+      // if it's the computer's turn
+      // generates a random coordinate for the computer to strike
       const computerStrike = computerCoordinates(regexPattern);
       row = computerStrike[0].charCodeAt(0) - "A".charCodeAt(0);
       column = computerStrike[1];
-
-      // call processStrike with the calculated row and column
 
       playerRemainingShips = processStrike(
         playerBoard,
@@ -336,7 +353,7 @@ function playGame(
         console.log("You lost!");
         break;
       }
-
+      // switch back to the player's turn
       isPlayer = true;
     }
   }
@@ -348,36 +365,50 @@ function playGame(
   }
 }
 
+// handles the logic of a strike on the board
 function processStrike(
   board,
   boardGui,
-  row,
-  column,
-  shipCount,
-  fleet,
-  isPlayer
+  row, // row number where the strike occurs
+  column, // column number where the strike occurs
+  shipCount, // current count of remaining ships
+  fleet, // either player or computer
+  isPlayer // indicates if it's the player or computer striking
 ) {
+  // adjusts the row index to match with the board's array structure. The * 2 is to handle the separator rows. The +2 is to offset the header row and initial separator row
   let adjustedRow = row * 2 + 2;
+  // retrieve information about the strike location on the board (example: "| 4")
   let shipIdInfo = board[adjustedRow][column];
+
+  // check if the strike hit a ship (represented by a digit)
   let shipIdRegex = /\d/;
 
+  // flag tracking if a ship is hit or not
   let shipHit = false;
 
   // when it's the player's turn to play
   if (isPlayer) {
+    // check if the strike hit a ship
     if (shipIdRegex.test(shipIdInfo)) {
+      // extracts the ship's ID from the board information
+      //shipId -> in example from above, shipId = 4
       let shipId = parseInt(shipIdInfo.match(/\d+/)[0]);
-
       board[adjustedRow][column] = "| X";
       boardGui[adjustedRow][column] = "| X";
+      // sets the ship hit flag to true
       shipHit = true;
 
+      // find the ship object in the fleet thanks to the ship's ID
       let hitShip = fleet.find((ship) => ship.id === shipId);
       if (hitShip) {
+        // increases the hit by 1
         hitShip.hits += 1;
+        // sets the hit flag of the ship object as true
         hitShip.hit = true;
+        // checks if the ship is sunk
         if (hitShip.size === hitShip.hits) {
           shipCount--;
+          // sets the sunk flag of the ship object
           hitShip.sunk = true;
           let article = hitShip.id === 5 ? "an" : "a";
           let shipNum = shipCount > 1 ? "ships" : "ship";
@@ -435,6 +466,7 @@ function processStrike(
       );
     }
   }
+  // returns updated ship count after a strike
   return shipCount;
 }
 
@@ -444,10 +476,11 @@ function printBoard(board) {
   }
 }
 
+// initializes & starts the game
 function startGame() {
   let playerBoard = createBoard(gridSize);
   let boardGui = createBoard(gridSize, true);
-  let computerBoard = createBoard(gridSize, true);
+  let computerBoard = createBoard(gridSize);
 
   placeShipsRandomly(playerBoard, playerFleet);
   placeShipsRandomly(computerBoard, computerFleet);
