@@ -2,15 +2,20 @@ var readlineSync = require("readline-sync");
 const pressedKey = readlineSync.keyIn("Press any key to start the game.");
 
 const numberOfShips = 2;
+const gridSize = 3;
 
-// creates the board
-function createBoard(size) {
-  let board = [];
+const createHeaders = () => {
   let headerRow = [" "];
   for (let column = 1; column <= size; column++) {
     headerRow.push(column < 10 ? ` ${column}` : `${column}`);
   }
-  board.push(headerRow);
+  return headerRow;
+};
+
+// creates the board
+function createBoard(size) {
+  let board = [];
+  board.push(createHeaders);
 
   for (let row = 1; row <= size; row++) {
     let rowContent = [String.fromCharCode(row + 64) + " "];
@@ -36,6 +41,21 @@ function placeShipsRandomly(board, numberOfShips) {
   }
 }
 
+const restartGame = (remainingShips) => {
+  if (remainingShips === 0) {
+    if (
+      readlineSync.keyInYN(
+        "You have destroyed all battleships. Would you like to play again? "
+      )
+    ) {
+      return startGame();
+    } else {
+      console.log("Thanks for playing captain!");
+      return;
+    }
+  }
+};
+
 function playGame(board) {
   let remainingShips = numberOfShips;
   while (remainingShips > 0) {
@@ -53,18 +73,9 @@ function playGame(board) {
 
     // call processStrike with the calculated row and column
     remainingShips = processStrike(board, row, column, remainingShips);
-    if (remainingShips === 0) {
-      if (
-        readlineSync.keyInYN(
-          "You have destroyed all battleships. Would you like to play again? "
-        )
-      ) {
-        return startGame();
-      } else {
-        console.log("Thanks for playing captain!");
-        return;
-      }
-    }
+    restartGame(remainingShips);
+
+    // restartGame(processStrike(board, row, column, remainingShips));
   }
 }
 
@@ -85,18 +96,17 @@ function processStrike(board, row, column, shipCount) {
   return shipCount;
 }
 
-// prints the board
-function printBoard(board) {
-  for (let row of board) {
-    console.log(row.join(" "));
-  }
-}
+// function printBoard(board) {
+//   for (let row of board) {
+//     console.log(row.join(" "));
+//   }
+// }
 
 // Start the game
-function startGame() {
-  let board = createBoard(3);
+function startGame(size) {
+  let board = createBoard(size);
   placeShipsRandomly(board, numberOfShips);
   playGame(board);
 }
 
-startGame();
+startGame(gridSize);
